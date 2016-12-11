@@ -14,6 +14,7 @@ function IO(constructorProperties) {
     this.routeName = constructorProperties.routeName;
     this.sessionManager = constructorProperties.sessionManager;
     this.viewEngine = constructorProperties.viewEngine;
+    this.method = constructorProperties.method;
     this.cookie = new Cookie();
     this.p = {
         type: "http",
@@ -31,7 +32,7 @@ function IO(constructorProperties) {
         this.request = req;
         this.response = res;
         this.inputs = req.inputs;
-        this.session = req.session;        
+        this.session = req.session;
         this.cookie.load({
             request: req,
             response: res
@@ -121,9 +122,8 @@ function IO(constructorProperties) {
      * @param {String|Function} url
      */
     this.redirect = function (url) {
-        this.status(301).header("Location", url).echo("");
+        this.status(302).header("Location", url).echo("");
 
     };
 }
 IO.prototype = new IOBuilder();
-

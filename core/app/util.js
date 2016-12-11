@@ -9,6 +9,7 @@ module.exports = new Util();
 var fs = require("fs");
 var crypto = require('crypto');
 var config = require(__dir + "/core/app/config");
+var os = require('os');
 /** Modules **/
 /**
  * Hash a string
@@ -66,6 +67,17 @@ String.prototype.decrypt = function () {
     dec += decipher.final('utf8');
     return dec;
 };
+/**
+ * Hash a string
+ * @returns {String}
+ */
+String.prototype.hashHex = function () {
+    return crypto.createHmac('sha256', config.get("app.encryption.key", "")).update(this.toString()).digest('hex');
+}
+/**
+ * Get file extension
+ * @returns {String}
+ */
 String.prototype.fileExtension = function () {
     var fileNameMap = this.toString().split(".");
     return fileNameMap.length >= 2 ? fileNameMap[fileNameMap.length - 1] : null;
@@ -120,7 +132,7 @@ function Util() {
     };
     /**
      * Delete directory and files
-     * @param {String} path     
+     * @param {String} path
      */
     this.deleteDirectory = function (path) {
         var self = this;
@@ -198,6 +210,24 @@ function Util() {
         var retval = false;
         if (fs.existsSync(filePath)) {
             retval = fs.readFileSync(filePath);
+        }
+        return retval;
+    };
+    /**
+     * Get local IP
+     * @returns {String}
+     */
+    this.getLocalIP = function() {
+        var retval = "127.0.0.1";
+        var interfaces = os.networkInterfaces();
+        for (var k in interfaces) {
+            for (var k2 in interfaces[k]) {
+                var address = interfaces[k][k2];
+                if (address.family === 'IPv4' && !address.internal) {
+                    retval = address.address;
+                    break;
+                }
+            }
         }
         return retval;
     };
