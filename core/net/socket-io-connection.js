@@ -40,6 +40,21 @@ function SocketIOConnection() {
     this.sendMessageToSession = function (session, type, message) {
         session.socket.emit(type, message);
     };
+    this.sendMessageToFilteredSessions = function (filter, type, message) {
+        var users = this.sessionManager.getSessions("socket.io");
+        for (var i = 0; i < users.length; i++) {
+            var isValidSession = true;
+            for (var filterProp in filter) {
+                if (!users[i].hasOwnProperty(filterProp) || (users[i].hasOwnProperty(filterProp) && users[i][filterProp] != filter[filterProp])) {
+                    isValidSession = false;
+                    break;
+                }
+            }
+            if (isValidSession && users[i].socket != null) {
+                users[i].socket.emit(type, message);
+            }
+        }
+    };
     this.broadcastMessage = function (type, message) {
         var users = this.sessionManager.getSessions("socket.io");
         for (var i = 0; i < users.length; i++) {
@@ -69,9 +84,11 @@ function SocketIOConnection() {
         var self = this;
         for (var namespace in self.messageListeners) {
             if (self.messageListeners[namespace] != null) {
-                socket.on(namespace, function (data) {
-                    self.messageListeners[namespace](data, session);
-                });
+                (function(e) {
+                     socket.on(e, function(data) {
+                        self.messageListeners[e](data, session);
+                     });
+                })(namespace);
             }
         }
     }
