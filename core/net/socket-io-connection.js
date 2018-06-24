@@ -62,15 +62,15 @@ function SocketIOConnection() {
             var isValidSession = true;
             for (var filterProp in filter) {
                 if (!users[i].hasOwnProperty(filterProp)
-                    || users[i][filterProp].split(",").indexOf(filter[filterProp]) == -1) {
+                    || users[i][filterProp].split(",").indexOf(filter[filterProp].toString()) == -1) {
                     isValidSession = false;
                     break;
                 }
             }
-        }
-        if (isValidSession && users[i].socket != null) {
-            users[i].socket.emit(type, message);
-        }
+            if (isValidSession && users[i].socket != null) {
+                users[i].socket.emit(type, message);
+            }
+        }        
     };
     this.broadcastMessage = function (type, message) {
         var users = this.sessionManager.getSessions("socket.io");
